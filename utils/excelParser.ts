@@ -1,7 +1,17 @@
-import * as XLSX from "xlsx";
 import type { playerType } from "@/types/player";
 
+// type helper ให้ TypeScript รู้ type ของ XLSX
+type XLSXModule = typeof import("xlsx");
+
 export const parsePlayerExcel = async (file: File): Promise<playerType[]> => {
+  // กันไม่ให้เรียกจากฝั่ง server เผื่อโดนใช้ผิดที่
+  if (import.meta.server) {
+    throw new Error("parsePlayerExcel can only be used on the client.");
+  }
+
+  // 🔥 โหลด xlsx เฉพาะตอนอยู่ฝั่ง client เท่านั้น
+  const XLSX: XLSXModule = await import("xlsx");
+
   const reader = new FileReader();
 
   const fileContent: string | ArrayBuffer | null = await new Promise(
